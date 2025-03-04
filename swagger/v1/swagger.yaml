@@ -1,0 +1,347 @@
+---
+openapi: 3.0.1
+info:
+  title: API V1
+  version: v1
+components:
+  securitySchemes:
+    BearerAuth:
+      type: apiKey
+      name: Authorization
+      in: header
+paths:
+  "/users":
+    get:
+      summary: Retrieves all users
+      tags:
+      - Users
+      responses:
+        '200':
+          description: successful
+    post:
+      summary: Create a user
+      tags:
+      - Users
+      parameters: []
+      responses:
+        '201':
+          description: user created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      email:
+                        type: string
+                    required:
+                    - id
+                    - name
+                    - email
+                  token:
+                    type: string
+        '422':
+          description: unprocessable entity
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+              required:
+              - name
+              - email
+              - password
+  "/auth/login":
+    post:
+      summary: User login
+      tags:
+      - Auth
+      parameters: []
+      responses:
+        '200':
+          description: successful login
+        '401':
+          description: unauthorized
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+              required:
+              - email
+              - password
+  "/auth/logout":
+    post:
+      summary: User logout
+      security:
+      - BearerAuth: []
+      tags:
+      - Auth
+      parameters:
+      - name: Authorization
+        in: header
+        description: Bearer token
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: successful logout
+        '400':
+          description: bad request - token not provided
+  "/bets":
+    post:
+      summary: Create a bet
+      security:
+      - BearerAuth: []
+      tags:
+      - Bets
+      parameters: []
+      responses:
+        '201':
+          description: Bet created
+        '422':
+          description: Unprocessable Entity
+        '401':
+          description: Unauthorized
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                game_id:
+                  type: integer
+                amount:
+                  type: number
+                odds:
+                  type: number
+                bet_type:
+                  type: string
+                  nullable: true
+              required:
+              - game_id
+              - amount
+              - odds
+  "/betshistory":
+    get:
+      summary: Retrieve bet history
+      security:
+      - BearerAuth: []
+      tags:
+      - Bets
+      responses:
+        '200':
+          description: successful
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    user_id:
+                      type: integer
+                    game_id:
+                      type: integer
+                    amount:
+                      type: number
+                    odds:
+                      type: number
+                    bet_type:
+                      type: string
+                      nullable: true
+                    potential_payout:
+                      type: number
+                    status:
+                      type: string
+                    created_at:
+                      type: string
+                      format: datetime
+                    updated_at:
+                      type: string
+                      format: datetime
+                    game:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        home_team:
+                          type: string
+                        away_team:
+                          type: string
+                        score:
+                          type: string
+                          nullable: true
+                        status:
+                          type: string
+                          nullable: true
+                        minute:
+                          type: integer
+                          nullable: true
+                  required:
+                  - id
+                  - user_id
+                  - game_id
+                  - amount
+                  - odds
+                  - status
+                  - created_at
+                  - updated_at
+  "/games":
+    get:
+      summary: List all games
+      security:
+      - BearerAuth: []
+      tags:
+      - Games
+      responses:
+        '200':
+          description: successful
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    home_team:
+                      type: string
+                    away_team:
+                      type: string
+                    score:
+                      type: string
+                      nullable: true
+                    status:
+                      type: string
+                    minute:
+                      type: integer
+                      nullable: true
+                    current_odds:
+                      type: object
+                    external_id:
+                      type: string
+                    created_at:
+                      type: string
+                      format: datetime
+                    updated_at:
+                      type: string
+                      format: datetime
+                  required:
+                  - id
+                  - home_team
+                  - away_team
+                  - status
+                  - external_id
+                  - created_at
+                  - updated_at
+  "/games/{id}":
+    get:
+      summary: Show a game
+      security:
+      - BearerAuth: []
+      tags:
+      - Games
+      parameters:
+      - name: id
+        in: path
+        description: Game ID or External ID
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  home_team:
+                    type: string
+                  away_team:
+                    type: string
+                  score:
+                    type: string
+                    nullable: true
+                  status:
+                    type: string
+                  minute:
+                    type: integer
+                    nullable: true
+                  odds:
+                    type: object
+                  external_id:
+                    type: string
+                  created_at:
+                    type: string
+                    format: datetime
+                  updated_at:
+                    type: string
+                    format: datetime
+                required:
+                - id
+                - home_team
+                - away_team
+                - status
+                - external_id
+                - created_at
+                - updated_at
+        '404':
+          description: Game not found
+  "/leaderboard":
+    get:
+      summary: Retrieve leaderboard
+      security:
+      - BearerAuth: []
+      tags:
+      - Leaderboard
+      responses:
+        '200':
+          description: successful
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    user_id:
+                      type: integer
+                    name:
+                      type: string
+                    total_payout:
+                      type: number
+                  required:
+                  - user_id
+                  - name
+                  - total_payout
+servers:
+- url: http://{defaultHost}
+  variables:
+    defaultHost:
+      default: localhost:3000
