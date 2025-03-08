@@ -44,5 +44,6 @@ module SportsBettingApp
     # Use Sidekiq for ActiveJob
     config.active_job.queue_adapter = :sidekiq
 
+    config.middleware.use Rack::Attack
   end
 end

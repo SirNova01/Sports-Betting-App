@@ -60,6 +60,8 @@ gem 'active_model_serializers', '~> 0.10.12'
 
 gem 'sidekiq'       
 gem 'redis' 
+gem 'rack-attack'
+
 
 group :development, :test do
   gem 'rswag'

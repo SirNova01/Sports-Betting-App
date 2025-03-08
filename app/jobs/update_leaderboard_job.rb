@@ -14,7 +14,6 @@ class UpdateLeaderboardJob < ApplicationJob
       }
     end
 
-    # Broadcast to Node.js via Redis
     $redis.publish('leaderboard_updates', data.to_json)
   end
 end

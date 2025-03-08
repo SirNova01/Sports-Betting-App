@@ -20,7 +20,6 @@ class UserAuthenticationService
 
   def encode_token(user_id)
     payload = { user_id: user_id }
-    # Use Rails' secret_key_base (or credentials) for production
     JWT.encode(payload, Rails.application.secret_key_base)
   end
 end

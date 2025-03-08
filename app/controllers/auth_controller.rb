@@ -1,5 +1,4 @@
 class AuthController < ApplicationController
-  # Skip any global authentication for login
   skip_before_action :authorize_request, only: [:login, :logout]
 
   def login
@@ -22,7 +21,4 @@ class AuthController < ApplicationController
       render json: { errors: ['Token not provided'] }, status: :bad_request
     end
   end
-
-  
-
 end

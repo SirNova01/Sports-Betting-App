@@ -1,4 +1,3 @@
-
 class UserRegistrationService
   def initialize(params)
     @params = params
@@ -17,13 +16,11 @@ class UserRegistrationService
   private
 
   def user_params
-    # Use slice or permit depending on your preference
     @params.slice(:name, :email, :password)
   end
 
   def encode_token(user_id)
     payload = { user_id: user_id }
-    # Use Rails' secret_key_base or credentials for production apps
     JWT.encode(payload, Rails.application.secret_key_base)
   end
 end

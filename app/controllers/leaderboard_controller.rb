@@ -1,38 +1,14 @@
 class LeaderboardController < ApplicationController
   def index
-    top_users = User.leaderboard_top_winnings(10) 
-    render json: top_users.map { |u|
-      {
-        user_id: u.id,
-        name: u.name,           
-        total_payout: u.total_winnings.to_f
-      }
-    }
+    top_users = LeaderboardService.new.fetch_top_users(10)
+    render json: Leaderboard::LeaderboardPresenter.new(top_users).as_json
+  rescue StandardError => e
+    handle_error(e)
   end
-end
- 
 
+  private
 
-class User < ApplicationRecord
-  has_secure_password
-  
-  validates :name, presence: true
-  validates :email, presence: true, uniqueness: true,
-                    format: { with: URI::MailTo::EMAIL_REGEXP }
-
-  
-  has_many :bets, dependent: :destroy
-
-  
-  def self.leaderboard_top_winnings(limit = 10)
-    joins(:bets)
-      .where(bets: { status: "won" })                   # only consider winning bets
-      .select(
-        "users.*, SUM(bets.potential_payout) AS total_winnings"
-      )
-      .group("users.id")
-      .order("total_winnings DESC")
-      .limit(limit)
+  def handle_error(error)
+    render json: { error: error.message }, status: :internal_server_error
   end
-  
 end

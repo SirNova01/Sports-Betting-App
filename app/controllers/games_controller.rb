@@ -3,20 +3,27 @@ class GamesController < ApplicationController
   def index
     games = Game.all
     render json: games, status: :ok
+  rescue StandardError => e
+    render json: { error: 'Something went wrong. Please try again.' }, status: :internal_server_error
   end
 
   # GET /games/:id
   def show
-    game = Game.find_by(id: params[:id]) || Game.find_by(external_id: params[:id])
+    service = GameLookupService.new(params[:id], params[:game_id])
+    game = service.call
 
     if game
-      formatted_game = game.as_json.except('current_odds') # Remove 'current_odds'
-      formatted_game['odds'] = game.current_odds # Rename 'current_odds' to 'odds'
-
-      render json: formatted_game, status: :ok
+      render json: format_game(game), status: :ok
     else
       render json: { error: 'Game not found' }, status: :not_found
     end
+  rescue StandardError => e
+    render json: { error: 'Something went wrong. Please try again.' }, status: :internal_server_error
   end
 
+  private
+
+  def format_game(game)
+    game.as_json.except('current_odds').merge('odds' => game.current_odds)
+  end
 end
